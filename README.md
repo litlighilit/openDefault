@@ -3,7 +3,7 @@ _instreseting skill showcase, just for fun_
 
 ## desc
 As an answser to `how to invoke the browser by programming`.  
-Some is translated from C++'s code (see `cpp` branch)
+Some is translated from C++'s code (see `cpp/`)
 
 ## struction
 there are two version of main module:
