@@ -1,4 +1,6 @@
 # to be included in `lib*.nim
+const lib_ed = declared(osproc)
+when not lib_ed: import std/osproc
 
 proc getDefaultBrowser: string =
   var buf: cstring
@@ -14,4 +16,9 @@ const arg = ' ' & url
 
 let cmd = qpath & arg
 
-discard execShellCmd(cmd)
+
+try:
+  # use `startProcess` to avoid blocking
+  discard startProcess(cmd, options={poEvalCommand})
+except OSError:
+  discard

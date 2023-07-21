@@ -6,7 +6,7 @@ when not lib_ed: import std/os # as `'import' is only allowed at top level`
 {.passL: "-l Shlwapi".}
 type
     cenum = c_int
-    DWORD = c_ulong
+    DWORD = uint32
 {.push header:"<shlwapi.h>", importc.}
 type ASSOCF = enum
     ASSOCF_VERIFY                = 0x00000040.cenum

@@ -2,14 +2,14 @@
 # As `proc openDefaultBrowser()`'s body (included) (require os, dynlib)
 # but can also run as a main module
 when not defined(windows): {.error: "this mod is Windows only!".}
-const lib_ed = declared(os)
-when not lib_ed: import std/[dynlib, os] # as `'import' is only allowed at top level`
+
+when not declared(dynlib): import std/dynlib # as `'import' is only allowed at top level`
 
 const ext = ".html"
 type
-  DWord = c_ulong
+  DWord = uint32
   cenum = c_int
-  HRESULT = c_long
+  HRESULT = int32
 
 const # see shlwapi.h
   ASSOCF_NOFIXUPS = 256
@@ -20,14 +20,13 @@ const # see shlwapi.h
 template cstr(p: pointer): cstring = cast[cstring](p)
 
 let lib = loadLib("shlwapi.dll")
-when lib_ed:
-  defer: unloadLib(lib)
-template lsym(s): pointer = lib.checkedSymAddr(s)
+
+template lsym(s): pointer = lib.symAddr(s)
 template loadsym(sym: untyped) =
   let sym = lsym(astToStr(sym))
 
 loadsym(AssocQueryStringA)
-if AssocQueryStringA == nil:
+if AssocQueryStringA.isNil:
   echo "could not find symbol: ", "AssocQueryStringA"
   unloadLib(lib)
   quit(-1)
@@ -42,13 +41,13 @@ template assocQueryString(
     pszExtra, pszOut: cstring, pcchOut: ptr[DWord]
 ): untyped =
     cast[FAssoc](AssocQueryStringA)(
-        flags.cenum, str.cenum, pszAssoc.cstring, pszExtra.cstring,
+        flags.cenum, str.cenum, pszAssoc.cstring, pszExtra,
         pszOut, pcchOut
     )
 template `|`(x, y: int): int = x or y
 template assoc(buffer: cstring, sizep: ptr[DWord]): untyped =
   assocQueryString(ASSOCF_NOFIXUPS|ASSOCF_VERIFY, ASSOCSTR_EXECUTABLE, ext,
-          nil, buffer, sizep)
+          cstring(nil), buffer, sizep)
 
 proc getDefaultBrowser(buf: var cstring): int =
   var size: DWord = 0
@@ -62,4 +61,4 @@ proc getDefaultBrowser(buf: var cstring): int =
 
 include ./lib_common
 
-when not lib_ed: unloadLib(lib)
+unloadLib(lib)

@@ -6,10 +6,10 @@ when not lib_ed: import std/os # as `'import' is only allowed at top level`
 {.passL: "-l Shlwapi".}
 type
     cenum = c_int
-    DWORD = c_ulong
+    DWORD = uint32
 
 type HRESULT{.header:"<shlwapi.h>", importc.} = enum
-  S_OK = 0.cenum
+  S_OK = 0.int32
 
 const ext = ".html"
 const assoc_c = "AssocQueryStringA(ASSOCF_NOFIXUPS|ASSOCF_VERIFY, ASSOCSTR_EXECUTABLE,\"" & ext & "\", NULL, #, #)"

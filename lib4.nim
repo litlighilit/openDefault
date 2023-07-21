@@ -1,13 +1,13 @@
 ## use emit
 when not defined(windows):{.error:"this mod is Windows only!".}
-const lib_ed = declared(os)
-when not lib_ed: import std/os
+
 {.passL: "-l Shlwapi".}
 type DWORD = c_ulong
 # {.emit: "/*INCLUDESECTION*/\n#include<shlwapi.h>".} # when included, /*INCLUDESECTION*/ is no use, as the `emit` is not top-level
 const inc_header = "-include shlwapi.h"
-when not lib_ed: {.local_passC: inc_header.} # `local_passc` will, when included, make nim complain "Error: unhandled exception: pragmas.nim(1097, 16) `sym != nil and sym.kind == skModule`  [AssertionDefect]"
-else: {.passc: inc_header.}
+
+# `local_passc` will, when included, make nim complain "Error: unhandled exception: pragmas.nim(1097, 16) `sym != nil and sym.kind == skModule`  [AssertionDefect]"
+{.passc: inc_header.}
 const ext = ".html"
 func assoc(
       pszOut: cstring, pcchOut: ptr[DWord]
