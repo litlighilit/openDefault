@@ -6,10 +6,12 @@ As an answser to `how to invoke the browser by programming`.
 Some is translated from C++'s code (see `cpp/`)
 
 ## struction
-there are two version of main module:
+there are three version of main module:
 
 - dynlib_openDefaultBrowser.nim (include lib1.nim, which is the only explicitly requiring `std/dynlib`)
-- openDefaultBrowser.nim (include lib2/3/4.nim, you can change the source to switch)
+- openDefaultBrowser.nim (include lib2/3/4.nim, you can change the source to switch) then one more mature version is <https://gist.github.com/litlighilit/11910c81587d60e840930cd49a90ffd2>
+- Another using std/registery:
+https://gist.github.com/litlighilit/8c19c4cb2dcec801ab424889684c4e69
 
 ### note
 In `lib_common`, which is shared by lib`n`.nim, the `url` is hard-coded,  
