@@ -25,7 +25,7 @@ proc getDefaultBrowser(buf: var cstring): int =
   buf = alloc(result).cstr
   assoc(buf, size.addr)
   if size == 0:
-    stderr.write "can't exec assco\n"
+    stderr.write "can't exec assoc\n"
     quit(-1)
 
 include ./lib_common
