@@ -1,5 +1,5 @@
 # openDefaultBrowser in Windows
-_instreseting skill showcase, just for fun_
+_interesting skill showcase, just for fun_
 
 ## desc
 As an answser to `how to invoke the browser by programming`.  
