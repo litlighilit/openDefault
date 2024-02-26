@@ -1,10 +1,10 @@
 
 import std/strutils
+import std/os
 
 when defined(windows):
   import std/winlean
 else:
-  import std/os
   import std/osproc
 
 proc prepare(s: string): string =
