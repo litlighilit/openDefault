@@ -1,11 +1,24 @@
 # openDefaultBrowser in Windows
-_interesting skill showcase, just for fun_
+
+There once was an intend to implement
+opening "about:blank" in Nim's stdlib `browsers` (via `openDefaultBrowser()` API).
+
+but finally it was found hard to implement (at least not as easily as thought).
+
+Anyway,
+this repo tries to implement that.
 
 ## desc
 As an answser to `how to invoke the browser by programming`.  
 Some is translated from C++'s code (see `cpp/`)
 
+## about `cpp/`
+C/C++ version of openDefaultBrowser, 
+created for testing under Windows
+
 ## about `otherImpl/`
+
+_interesting skill showcase, just for fun_
 
 In `otherImpl` subdir, there are server `lib*.nim`,
 which are different versions of the almostly same logic.
