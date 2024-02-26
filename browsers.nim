@@ -1,7 +1,11 @@
 
-import std/os
 import std/strutils
-import std/winlean
+
+when defined(windows):
+  import std/winlean
+else:
+  import std/os
+  import std/osproc
 
 proc prepare(s: string): string =
   if s.contains("://"):
@@ -43,6 +47,20 @@ when defined(windows):
     assoc(assoc, extra, result, size.addr)
   var browser{.threadvar.}: WideCStringObj
 else:
+  const
+    DesktopAppDirs = [
+      "~/.local/share/applications",
+      "/usr/share/applications"
+    ]
+    DesktopLaunchers = [
+      "gio launch $# $#",
+      "gtk-launch $# $#"
+    ]
+  proc searchDesktopFile(fn: string): string =
+    for dir in DesktopAppDirs:
+      let pth = dir.expandTilde / fn
+      if fileExists pth: return pth
+    
   var browser{.threadvar.}: string
     
 proc openDefaultBrowserRaw(url: string) =
@@ -60,6 +78,7 @@ proc openDefaultBrowserRaw(url: string) =
     if browser != default typeof browser:
       op(browser)
       return
+
     template test(b) =
       try:
         op(b)
@@ -67,10 +86,18 @@ proc openDefaultBrowserRaw(url: string) =
         return
       except OSError:
         discard
-    let dotDesktop = quoteShell execProcess("xdg-mime query default text/html")
-    let dBro = try: execProcess("gtk-open "&dotDesktop)
-               except OSError: execProcess("gi launch "&dotDesktop)
-    test(dBro)
+    var desktopFn = execProcess("xdg-mime query default x-scheme-handler/http")
+    if desktopFn.len != 0 and desktopFn[^1] == '\n': desktopFn.setLen desktopFn.len-1
+    let pth = searchDesktopFile desktopFn
+    if pth != "":
+      let
+        aPth = quoteShell pth
+        aUrl = quoteShell url
+      for laun in DesktopLaunchers:
+        try:
+          discard execProcess(laun % [aPth, aUrl])
+          return
+        except OSError: discard
     for b in getEnv("BROWSER").split(PathSep):
       test(b)
 
