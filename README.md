@@ -8,6 +8,11 @@ but finally it was found hard to implement (at least not as easily as thought).
 Anyway,
 this repo tries to implement that.
 
+**Progress**:
+
+ - Not tested under Mac OS X
+ - implemented for Linux and Windows
+
 ## desc
 As an answser to `how to invoke the browser by programming`.  
 Some is translated from C++'s code (see `cpp/`)
