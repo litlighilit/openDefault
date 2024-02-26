@@ -5,8 +5,9 @@
 #pragma comment(lib, "Shell32.lib")
 
 #define F_ASSOC ASSOCF_NONE // ASSOCF_NOFIXUPS|ASSOCF_VERIFY
-#define assoc(buffer, sizep) ::AssocQueryStringW(F_ASSOC,\
-  ASSOCSTR_EXECUTABLE, L".html", NULL, (buffer), (sizep))
+#define assoc(buffer, sizep) ::AssocQueryStringW(F_ASSOC, ASSOCSTR_EXECUTABLE,\
+  L"http", L"open", (buffer), (sizep))
+//  L".html", NULL, (buffer), (sizep))
 
 DWORD getDefaultBrowser(LPWSTR &pszPath){
     DWORD size = 0;
