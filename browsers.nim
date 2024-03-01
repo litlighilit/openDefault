@@ -47,22 +47,26 @@ when defined(windows):
     assoc(assoc, extra, result, size.addr)
   var browser{.threadvar.}: WideCStringObj
 else:
-  const
-    DesktopAppDirs = [
-      "~/.local/share/applications",
-      "/usr/share/applications"
-    ]
-    DesktopLaunchers = [
-      "gio launch $# $#",
-      "gtk-launch $# $#"
-    ]
-  proc searchDesktopFile(fn: string): string =
-    for dir in DesktopAppDirs:
-      let pth = dir.expandTilde / fn
-      if fileExists pth: return pth
+  when not defined(macosx):
+    const
+      DesktopAppDirs = [
+        "~/.local/share/applications",
+        "/usr/share/applications"
+      ]
+      DesktopLaunchers = [
+        "gio launch $# $#",
+        "gtk-launch $# $#"
+      ]
+    proc searchDesktopFile(fn: string): string =
+      for dir in DesktopAppDirs:
+        let pth = dir.expandTilde / fn
+        if fileExists pth: return pth
     
-  var browser{.threadvar.}: string
-    
+  var browser{.threadvar.}: string ## 
+  ## Under Linux, the full path of default browser;
+  ## Under Mac OS X, the application identifier of default browser
+  ##  (has been quoted via `quoteShell`)
+  
 proc openDefaultBrowserRaw(url: string) =
   ## passing `url` to the browser "AS IS", will never add `file://` prefix
   when defined(windows):
@@ -70,7 +74,17 @@ proc openDefaultBrowserRaw(url: string) =
     let arg = newWideCString(url)
     discard shellExecuteW(0'i32, nil, browser, arg, nil, SW_SHOWNORMAL)
   elif defined(macosx):
-    discard execShellCmd(osOpenCmd & " " & quoteShell(url))
+    if url == "about:blank":
+      ## use `open -a <app> about:blank` command
+      if browser == default typeof browser:
+        browser = execProcess(
+          "perl -MMac::InternetConfig" &
+            """ -le 'print +(GetICHelper "http")[1]')" """,
+            env = %{"VERSIONER_PERL_PREFER_32_BIT":"1"})
+        browser = quoteShell(browser)
+      discard execShellCmd("open -a " & browser & " about:blank")
+    else:
+      discard execShellCmd("open " & quoteShell(url))
   else:
     template op(nbrowser) = 
         # we use `startProcess` here because we don't want to block!
