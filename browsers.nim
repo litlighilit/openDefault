@@ -109,7 +109,8 @@ proc openDefaultBrowserRaw(url: string) =
         aUrl = quoteShell url
       for laun in DesktopLaunchers:
         try:
-          discard execProcess(laun % [aPth, aUrl])
+          discard startProcess(laun % [aPth, aUrl],
+            options={poUsePath, poEvalCommand})
           return
         except OSError: discard
     for b in getEnv("BROWSER").split(PathSep):
