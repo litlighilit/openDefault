@@ -12,6 +12,7 @@ this repo tries to implement that.
 
  - Not tested under Mac OS X
  - implemented for Linux, Windows and Mac OS X
+ - add support for JavaScript backend
 
 ## desc
 As an answser to `how to invoke the browser by programming`.  
