@@ -61,19 +61,26 @@ else:
     var browser{.threadvar.}: WideCStringObj
   else:
     when not defined(macosx):
-      const
-        DesktopAppDirs = [
-          "~/.local/share/applications",
-          "/usr/share/applications"
-        ]
-        DesktopLaunchers = [
+      const DesktopLaunchers = [
           "gio launch $# $#",
           "gtk-launch $# $#"
         ]
       proc searchDesktopFile(fn: string): string =
-        for dir in DesktopAppDirs:
-          let pth = dir.expandTilde / fn
+        # translated from xdg-open `open_generic_xdg_mime()`
+        template checkInDir(dir) =
+          let pth = dir / fn
           if fileExists pth: return pth
+        template checkInEnv(env) =
+          if existsEnv env:
+            let dirs = getEnv env 
+            for dir in dirs.split PathSep: checkInDir dir
+        checkInEnv "XDG_DATA_HOME"
+        checkInDir "~/.local/share/applications".expandTilde
+        checlInEnv "XDG_DATA_DIRS"
+        for dir in [
+          "/usr/local/share/applications",
+          "/usr/share/applications"
+        ]: checkInDir dir
       
     var browser{.threadvar.}: string ## 
     ## Under Linux, the full path of default browser;
