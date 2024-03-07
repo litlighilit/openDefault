@@ -208,7 +208,7 @@ when isMainModule:
     openDefaultBrowser("https://nim-lang.org")
   else:
     if paramCount()>0:
-      openDefaultBrowser paramStr 1
+      openDefault paramStr 1
     else:
       openDefaultBrowser()
   
