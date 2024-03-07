@@ -188,10 +188,13 @@ proc openDefaultBrowser*(url: string) =
   ## 
   ## if `url` doesn't contains "://", 
   ## it'll be tried to interpreted as a local file path
+  runnableExamples:
+    openDefaultBrowser "about:blank" # open blank page
+    openDefaultBrowser "https://nim-lang.org"
   openDefault prepare url,BrowserScheme
 proc openDefaultBrowser* =
-  ## open default browser with "about:blank"
-  openDefault "about:blank", BrowserScheme
+  ## open default browser with inital page.
+  openDefault "", BrowserScheme
 
 when isMainModule:
   when defined(js) and not defined(nodejs):
