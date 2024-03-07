@@ -17,8 +17,6 @@ type DefaultNotFoundError = object of ValueError ## thrown when:
 template raiseDefNErr(msg="can't find default app") =
   raise newException(DefaultNotFoundError, msg)
 
-
-
 proc prepare(s: string): string =
   if s.contains("://") or s.startsWith"about:":
     result = s
@@ -173,6 +171,9 @@ else:
 
 
 proc openDefault*(uri, scheme: string) =
+  ## open `uri` with external application configured to open `scheme`
+  ## 
+  ## `uri`'s scheme is ignored
   openDefaultRaw(uri, mapScheme scheme)
 proc openDefault*(uri: string) =
   ## `uri` can not be empty and must start with a scheme
@@ -182,8 +183,15 @@ proc openDefault*(uri: string) =
   openDefault uri, scheme
 
 const BrowserScheme = "https"
-proc openDefaultBrowser*(url: string) = openDefault prepare url,BrowserScheme
-proc openDefaultBrowser* = openDefault "about:blank", BrowserScheme
+proc openDefaultBrowser*(url: string) =
+  ## open default browser with `url`
+  ## 
+  ## if `url` doesn't contains "://", 
+  ## it'll be tried to interpreted as a local file path
+  openDefault prepare url,BrowserScheme
+proc openDefaultBrowser* =
+  ## open default browser with "about:blank"
+  openDefault "about:blank", BrowserScheme
 
 when isMainModule:
   when defined(js) and not defined(nodejs):
