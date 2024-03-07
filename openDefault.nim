@@ -156,21 +156,25 @@ else:
           return
         except err: discard
       template tryDo(action) = tryDo OSError,action
+
+      let qUrl = quoteShell url
       
       var path: string # desktop file path
       tryDo(err=DefaultNotFoundError):
         path = cachedGetDefault scheme
-        let aUrl = quoteShell url
         for laun in DesktopLaunchers:
           tryDo:
-            discard startProcess(laun % [path, aUrl],
+            discard startProcess(laun % [path, qUrl],
               options={poUsePath, poEvalCommand})
             cachedPath[scheme] = path
       if scheme == BrowserScheme:
         for b in getEnv("BROWSER").split(PathSep):
           tryDo:
-            discard startProcess(command = b, args = [url],
-              options = {poUsePath})
+            let cmd =  # BROWESR env-var may contain %s placeholder
+              if '%' in b: b.multireplace(("%s",qurl),("%%","%"))
+              else: b & ' ' & qUrl
+            discard startProcess(cmd,
+              options={poUsePath, poEvalCommand})
       raiseDefNErr()
 
 
@@ -204,6 +208,7 @@ when isMainModule:
     openDefaultBrowser("https://nim-lang.org")
   else:
     if paramCount()>0:
-      openDefault paramStr 1
+      openDefaultBrowser paramStr 1
     else:
       openDefaultBrowser()
+  
