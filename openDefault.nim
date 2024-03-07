@@ -17,6 +17,8 @@ type DefaultNotFoundError = object of ValueError ## thrown when:
 template raiseDefNErr(msg="can't find default app") =
   raise newException(DefaultNotFoundError, msg)
 
+const BrowserScheme = "https"
+
 proc prepare(s: string): string =
   if s.contains("://") or s.startsWith"about:":
     result = s
@@ -24,7 +26,8 @@ proc prepare(s: string): string =
     result = "file://" & absolutePath(s)
 
 proc mapScheme(scheme: string): string =
-  if scheme == "about": "http" else: scheme
+  if scheme == "about": BrowserScheme else: scheme
+
 
 when defined(js):
   proc openDefault*(url, scheme: string){.
@@ -76,7 +79,7 @@ else:
     proc strip1NL(s: var string): bool =
       ## returns whether s.len != 0 and s!="\n"
       let len1 = s.len-1
-      if len1==-1 : return
+      if len1 == -1 : return
       if s[len1]=='\n':
         s.setlen len1 
         if s.len == 0: return
@@ -109,7 +112,7 @@ else:
             for dir in dirs.split PathSep: checkInDir dir
         checkInEnv "XDG_DATA_HOME"
         checkInDir "~/.local/share/applications".expandTilde
-        checlInEnv "XDG_DATA_DIRS"
+        checkInEnv "XDG_DATA_DIRS"
         for dir in [
           "/usr/local/share/applications",
           "/usr/share/applications"
@@ -146,23 +149,24 @@ else:
       discard execShellCmd("open -a " & path & ' ' & url)
       return
     else:
-      template tryDo(action, err=OSError) =
+      template tryDo(err;action) =
         ## prevent exception propagation
         try:
           action
           return
         except err: discard
+      template tryDo(action) = tryDo OSError,action
       
       var path: string # desktop file path
-      tryDo(err=DefaultNotFoundError): path = cachedGetDefault scheme
-
-      let aUrl = quoteShell url
-      for laun in DesktopLaunchers:
-        tryDo:
-          discard startProcess(laun % [path, aUrl],
-            options={poUsePath, poEvalCommand})
-          cachedPath[scheme] = aPth
-      if scheme == "http":
+      tryDo(err=DefaultNotFoundError):
+        path = cachedGetDefault scheme
+        let aUrl = quoteShell url
+        for laun in DesktopLaunchers:
+          tryDo:
+            discard startProcess(laun % [path, aUrl],
+              options={poUsePath, poEvalCommand})
+            cachedPath[scheme] = path
+      if scheme == BrowserScheme:
         for b in getEnv("BROWSER").split(PathSep):
           tryDo:
             discard startProcess(command = b, args = [url],
@@ -182,7 +186,6 @@ proc openDefault*(uri: string) =
   doAssert scheme.len != 0, "URI must start with a scheme"
   openDefault uri, scheme
 
-const BrowserScheme = "https"
 proc openDefaultBrowser*(url: string) =
   ## open default browser with `url`
   ## 
@@ -201,6 +204,6 @@ when isMainModule:
     openDefaultBrowser("https://nim-lang.org")
   else:
     if paramCount()>0:
-      openDefaultBrowser paramStr 1
+      openDefault paramStr 1
     else:
       openDefaultBrowser()
