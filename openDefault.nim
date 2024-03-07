@@ -20,7 +20,7 @@ template raiseDefNErr(msg="can't find default app") =
 
 
 proc prepare(s: string): string =
-  if s.contains("://"):
+  if s.contains("://") or s.startsWith"about:":
     result = s
   else:
     result = "file://" & absolutePath(s)
